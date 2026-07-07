@@ -1,0 +1,35 @@
+{
+  "name": "ailura-premium",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "deploy": "npx vercel --prod"
+  },
+  "dependencies": {
+    "@studio-freight/lenis": "^1.0.42",
+    "@supabase/supabase-js": "^2.106.2",
+    "framer-motion": "^11.18.2",
+    "gsap": "^3.15.0",
+    "lucide-react": "^0.400.0",
+    "next": "latest",
+    "razorpay": "^2.9.6",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-toastify": "^11.1.0",
+    "recharts": "^3.8.1",
+    "resend": "^6.16.0",
+    "sonner": "^2.0.7",
+    "zustand": "^4.5.7"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^3.4.1",
+    "typescript": "6.0.3"
+  }
+}
