@@ -48,7 +48,6 @@ export default function CheckoutPage() {
 
   const total = subtotal - discount
 
-  // ── Load Razorpay Script ──
   const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {
       if (window.Razorpay) { resolve(true); return }
@@ -60,8 +59,8 @@ export default function CheckoutPage() {
     })
   }
 
-  // ── Save Order to Database (COD + Online dono ke liye) ──
-  const saveOrder = async (
+  // ── Sirf order row insert karo — fast, redirect ke liye id chahiye ──
+  const createOrderRow = async (
     session: any,
     paymentStatus: 'pending' | 'paid',
     razorpayPaymentId?: string
@@ -69,7 +68,6 @@ export default function CheckoutPage() {
     const fullName = `${firstName} ${lastName}`
     const shippingAddress = `${address}${apartment ? ', ' + apartment : ''}, ${city}, ${stateName}, ${pincode}`
 
-    // 1. Order create karo — Capitalized status values save karo, taaki admin panel ke selects se match ho
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert([{
@@ -93,59 +91,66 @@ export default function CheckoutPage() {
       .single()
 
     if (orderError || !order) throw orderError
+    return { order, fullName, shippingAddress }
+  }
 
-    // 2. Order items save karo
-    const orderItems = items.map((item) => ({
-      order_id: order.id,
-      product_id: item.id,
-      quantity: item.quantity,
-      price: item.price,
-      product_title: item.title,
-      product_image: item.image_urls?.[0] || '',
-    }))
+  // ── Baaki sab (items, stock, coupon, email) — background mein, redirect ko block nahi karta ──
+  const finishOrderInBackground = (
+    order: any,
+    fullName: string,
+    shippingAddress: string,
+    cartItems: typeof items
+  ) => {
+    (async () => {
+      try {
+        const orderItems = cartItems.map((item) => ({
+          order_id: order.id,
+          product_id: item.id,
+          quantity: item.quantity,
+          price: item.price,
+          product_title: item.title,
+          product_image: item.image_urls?.[0] || '',
+        }))
+        await supabase.from('order_items').insert(orderItems)
 
-    const { error: orderItemsError } = await supabase.from('order_items').insert(orderItems)
-    if (orderItemsError) throw orderItemsError
+        for (const item of cartItems) {
+          const { data: product } = await supabase
+            .from('products').select('stock').eq('id', item.id).single()
+          await supabase
+            .from('products')
+            .update({ stock: Number(product?.stock || 0) - item.quantity })
+            .eq('id', item.id)
+        }
 
-    // 3. Stock reduce karo
-    for (const item of items) {
-      const { data: product } = await supabase
-        .from('products').select('stock').eq('id', item.id).single()
-      await supabase
-        .from('products')
-        .update({ stock: Number(product?.stock || 0) - item.quantity })
-        .eq('id', item.id)
-    }
+        if (coupon) {
+          await supabase.rpc('increment_coupon_usage', { coupon_code: coupon.code })
+        }
 
-    // 4. Coupon usage update karo
-    if (coupon) {
-      await supabase.rpc('increment_coupon_usage', { coupon_code: coupon.code })
-    }
-
-    // 5. Email bhejo
-    await fetch('/api/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'order_placed',
-        order: {
-          id: order.id,
-          order_status: order.order_status,
-          subtotal,
-          discount_amount: discount,
-          total_amount: total,
-          shipping_address: shippingAddress,
-          customer_name: fullName,
-          customer_email: email,
-          customer_phone: phone,
-          tracking_id: null,
-        },
-        customerEmail: email,
-        customerName: firstName,
-      }),
-    })
-
-    return order
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'order_placed',
+            order: {
+              id: order.id,
+              order_status: order.order_status,
+              subtotal,
+              discount_amount: discount,
+              total_amount: total,
+              shipping_address: shippingAddress,
+              customer_name: fullName,
+              customer_email: email,
+              customer_phone: phone,
+              tracking_id: null,
+            },
+            customerEmail: email,
+            customerName: firstName,
+          }),
+        })
+      } catch (err) {
+        console.error('Background order finalize failed:', err)
+      }
+    })()
   }
 
   // ── COD Flow ──
@@ -155,11 +160,15 @@ export default function CheckoutPage() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { toast.error('Please login first'); router.push('/login'); return }
 
-      const order = await saveOrder(session, 'pending')
+      const { order, fullName, shippingAddress } = await createOrderRow(session, 'pending')
+      const cartItemsSnapshot = [...items]
+
       clearCart()
       removeCoupon()
       toast.success('Order placed successfully!')
       router.push(`/order-success?id=${order.id}`)
+
+      finishOrderInBackground(order, fullName, shippingAddress, cartItemsSnapshot)
     } catch (error) {
       console.log(error)
       toast.error('Failed to place order')
@@ -213,16 +222,32 @@ export default function CheckoutPage() {
             })
 
             const verifyData = await verifyRes.json()
-            if (!verifyData.success) { toast.error('Payment verification failed'); return }
+            if (!verifyData.success) {
+              toast.error('Payment verification failed')
+              setLoading(false)
+              return
+            }
 
-            const order = await saveOrder(session, 'paid', response.razorpay_payment_id)
+            // Sirf order row insert — fast, id yahi se milegi
+            const { order, fullName, shippingAddress } = await createOrderRow(
+              session, 'paid', response.razorpay_payment_id
+            )
+            const cartItemsSnapshot = [...items]
+
+            // 🚀 Turant clear + redirect
             clearCart()
             removeCoupon()
             toast.success('Payment successful! Order placed.')
             router.push(`/order-success?id=${order.id}`)
+            setLoading(false)
+
+            // Baaki sab background mein
+            finishOrderInBackground(order, fullName, shippingAddress, cartItemsSnapshot)
+
           } catch (err) {
             console.error(err)
             toast.error('Order saving failed after payment. Please contact support.')
+            setLoading(false)
           }
         },
         modal: {
@@ -243,7 +268,6 @@ export default function CheckoutPage() {
     }
   }
 
-  // ── Main Handler ──
   const handlePlaceOrder = () => {
     if (!email || !firstName || !lastName || !phone || !address || !city || !stateName || !pincode) {
       toast.error('Please fill all fields')
@@ -341,9 +365,7 @@ export default function CheckoutPage() {
 
               <div className="space-y-3">
 
-                <div
-                  className="w-full flex items-start gap-4 p-4 border border-black/10 opacity-50 cursor-not-allowed"
-                >
+                <div className="w-full flex items-start gap-4 p-4 border border-black/10 opacity-50 cursor-not-allowed">
                   <div className="mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 border-black/25 flex items-center justify-center" />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">

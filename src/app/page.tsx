@@ -14,6 +14,8 @@ import Footer from '../components/layout/Footer'
 import WhatsAppButton from '../components/WA-auto/WhatsAppButton'
 import WelcomePopup from '../components/Welcome/WelcomePopup'
 
+export const dynamic = 'force-dynamic'  
+
 import { getProducts } from '../service/products'
 
 export default async function HomePage() {
