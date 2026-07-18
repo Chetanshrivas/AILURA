@@ -27,6 +27,25 @@ function detectCarrier(trackingId: string): { name: string; url: string | null }
   return { name: 'Courier', url: null }
 }
 
+// ── Services array ko display ke liye format karo — naye "services" array ya purane "service" field dono handle karta hai ──
+function formatServices(appointment: any): string {
+  if (Array.isArray(appointment.services) && appointment.services.length > 0) {
+    return appointment.services.join(', ')
+  }
+  return appointment.service || '—'
+}
+
+// ── Services ko HTML list (bullet points) ke tarike mein render karo, jab multiple ho ──
+function formatServicesHTML(appointment: any): string {
+  if (Array.isArray(appointment.services) && appointment.services.length > 0) {
+    if (appointment.services.length === 1) return appointment.services[0]
+    return appointment.services
+      .map((s: string) => `<span style="display:inline-block;background:#F8F5F0;border:1px solid #E8DED3;padding:3px 10px;margin:2px 4px 2px 0;font-size:11px;color:#111;">${s}</span>`)
+      .join('')
+  }
+  return appointment.service || '—'
+}
+
 // ── Rate limiting — IP pe max 5 requests/min ──
 const rateLimit = new Map<string, { count: number; resetAt: number }>()
 
@@ -93,7 +112,7 @@ export async function POST(req: NextRequest) {
       await resend.emails.send({
         from: 'AILURA <orders@ailurastudio.com>',
         to: ADMIN_EMAIL,
-        subject: `📅 New Appointment — ${appointment.full_name} | ${appointment.service}`,
+        subject: `New Appointment — ${appointment.full_name} | ${formatServices(appointment)}`,
         html: adminAppointmentTemplate(appointment),
       })
     }
@@ -261,13 +280,18 @@ function adminAppointmentTemplate(appointment: any) {
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:500px;background:#fff;border:1px solid #e0e0e0;">
   <tr><td style="background:#0E0B07;padding:24px 32px;">
     <p style="margin:0;font-size:10px;letter-spacing:8px;color:#C9A86A;text-transform:uppercase;">A I L U R A · ADMIN</p>
-    <h2 style="margin:8px 0 0;font-size:20px;font-weight:400;color:#fff;">New Appointment Request 📅</h2>
+    <h2 style="margin:8px 0 0;font-size:20px;font-weight:400;color:#fff;">New Appointment Request</h2>
   </td></tr>
   <tr><td style="padding:28px 32px;">
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F5F0;border:1px solid #E8DED3;margin-bottom:20px;">
       <tr>
-        <td style="padding:16px 20px;"><p style="margin:0 0 2px;font-size:9px;color:#C9A86A;text-transform:uppercase;letter-spacing:3px;">Service</p><p style="margin:0;font-size:16px;font-weight:300;color:#111;">${appointment.service}</p></td>
-        <td style="padding:16px 20px;text-align:right;"><p style="margin:0 0 2px;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:3px;">Date & Time</p><p style="margin:0;font-size:13px;color:#C9A86A;">${appointment.appointment_date}<br/>${appointment.appointment_time}</p></td>
+        <td style="padding:16px 20px;" colspan="2">
+          <p style="margin:0 0 6px;font-size:9px;color:#C9A86A;text-transform:uppercase;letter-spacing:3px;">Services (${Array.isArray(appointment.services) ? appointment.services.length : 1})</p>
+          <div style="line-height:2;">${formatServicesHTML(appointment)}</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:16px 20px;border-top:1px solid #E8DED3;"><p style="margin:0 0 2px;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:3px;">Date & Time</p><p style="margin:0;font-size:13px;color:#C9A86A;">${appointment.appointment_date} · ${appointment.appointment_time}</p></td>
       </tr>
     </table>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
@@ -299,8 +323,16 @@ function appointmentCustomerTemplate(appointment: any) {
     </p>
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F5F0;border:1px solid #E8DED3;margin-bottom:28px;">
       <tr>
-        <td style="padding:16px 20px;"><p style="margin:0 0 2px;font-size:9px;color:#C9A86A;text-transform:uppercase;letter-spacing:3px;">Service</p><p style="margin:0;font-size:16px;font-weight:300;color:#111;">${appointment.service}</p></td>
-        <td style="padding:16px 20px;text-align:right;"><p style="margin:0 0 2px;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:3px;">Date & Time</p><p style="margin:0;font-size:13px;color:#C9A86A;">${appointment.appointment_date}<br/>${appointment.appointment_time}</p></td>
+        <td style="padding:16px 20px;">
+          <p style="margin:0 0 6px;font-size:9px;color:#C9A86A;text-transform:uppercase;letter-spacing:3px;">Services</p>
+          <div style="line-height:2;">${formatServicesHTML(appointment)}</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:16px 20px;border-top:1px solid #E8DED3;">
+          <p style="margin:0 0 2px;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:3px;">Date & Time</p>
+          <p style="margin:0;font-size:13px;color:#C9A86A;">${appointment.appointment_date} · ${appointment.appointment_time}</p>
+        </td>
       </tr>
     </table>
     <p style="margin:0;font-size:12px;line-height:1.9;color:rgba(0,0,0,0.45);">
@@ -334,8 +366,16 @@ function appointmentUpdatedTemplate(appointment: any) {
     <p style="margin:0 0 28px;font-size:13px;line-height:1.9;color:rgba(0,0,0,0.55);">Hi ${appointment.full_name}, ${message}</p>
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F5F0;border:1px solid #E8DED3;margin-bottom:28px;">
       <tr>
-        <td style="padding:16px 20px;"><p style="margin:0 0 2px;font-size:9px;color:#C9A86A;text-transform:uppercase;letter-spacing:3px;">Service</p><p style="margin:0;font-size:16px;font-weight:300;color:#111;">${appointment.service}</p></td>
-        <td style="padding:16px 20px;text-align:right;"><p style="margin:0 0 2px;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:3px;">Date & Time</p><p style="margin:0;font-size:13px;color:#C9A86A;">${appointment.appointment_date}<br/>${appointment.appointment_time}</p></td>
+        <td style="padding:16px 20px;">
+          <p style="margin:0 0 6px;font-size:9px;color:#C9A86A;text-transform:uppercase;letter-spacing:3px;">Services</p>
+          <div style="line-height:2;">${formatServicesHTML(appointment)}</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:16px 20px;border-top:1px solid #E8DED3;">
+          <p style="margin:0 0 2px;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:3px;">Date & Time</p>
+          <p style="margin:0;font-size:13px;color:#C9A86A;">${appointment.appointment_date} · ${appointment.appointment_time}</p>
+        </td>
       </tr>
     </table>
     <p style="margin:0;font-size:12px;line-height:1.9;color:rgba(0,0,0,0.45);">

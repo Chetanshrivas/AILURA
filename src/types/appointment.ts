@@ -8,7 +8,9 @@ export interface Appointment {
 
   email: string
 
-  service: string
+  service?: string          // legacy field — purani appointments ke liye
+
+  services?: string[]       // naya field — naye Contact form se aane wale multiple services
 
   appointment_date: string
 

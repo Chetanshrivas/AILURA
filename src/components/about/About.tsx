@@ -108,64 +108,57 @@ export default function About() {
           />
         </motion.div>
 
-        {/* Description */}
+        {/* Description — luxury upgrade */}
 
-       <div
-  className="
-  mt-20
-  max-w-[780px]
-  text-[26px]
-"
->
-  <p
-    className="
-    text-[24px]
-    leading-[2]
-    font-light
-    text-black/55
-  "
-  >
+        <div className="mt-20 max-w-[780px]">
+          <span
+            className="block leading-none text-[#C9A86A]/40 select-none"
+            style={{ fontFamily: 'Georgia, serif', fontSize: '90px' }}
+          >
+            "
+          </span>
+          <p className="-mt-10 text-[24px] leading-[2] font-light text-black/55">
             AILURA creates handcrafted luxury nail
-            collections inspired by elegance,
-            fashion and modern beauty. Every design
+            collections inspired by{' '}
+            <span className="italic text-[#C9A86A]">elegance, fashion</span>{' '}
+            and modern beauty. Every design
             is curated to elevate confidence and
             celebrate individuality through premium
             craftsmanship.
           </p>
         </div>
 
-        {/* Stats */}
+        {/* Stats — luxury upgrade */}
 
-        <div
-          className="
-          mt-12
-          flex
-          gap-20
-          border-t
-          border-[#E7DED4]
-          pt-10
-        "
-        >
-          <div>
-            <h3 className="text-5xl">500+</h3>
-            <p className="mt-2 text-xs uppercase tracking-[4px] text-black/40">
-              Happy Clients
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-5xl">98%</h3>
-            <p className="mt-2 text-xs uppercase tracking-[4px] text-black/40">
-              Satisfaction
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-5xl">1</h3>
-            <p className="mt-2 text-xs uppercase tracking-[4px] text-black/40">
-              Years Craft
-            </p>
-          </div>
+        <div className="mt-12 flex border-t border-[#E7DED4] pt-10">
+          {[
+            { value: '500', suffix: '+', label: 'Happy Clients' },
+            { value: '98', suffix: '%', label: 'Satisfaction' },
+            { value: '1', suffix: '', label: 'Years Craft' },
+          ].map((stat, i) => (
+            <div key={stat.label} className="group flex items-center">
+              {i > 0 && <div className="mr-16 h-14 w-[1px] bg-[#E7DED4]" />}
+              <div>
+                <div className="flex items-center gap-1.5 mb-3">
+                  <span className="h-[3px] w-[3px] rounded-full bg-[#C9A86A]" />
+                  <span className="text-[9px] uppercase tracking-[3px] text-[#C9A86A]/70">
+                    0{i + 1}
+                  </span>
+                </div>
+                <h3
+                  className="italic font-light leading-none text-[#111] transition-colors duration-500 group-hover:text-[#C9A86A]"
+                  style={{ fontFamily: 'Georgia, serif', fontSize: '52px' }}
+                >
+                  {stat.value}
+                  <span className="text-[#C9A86A]">{stat.suffix}</span>
+                </h3>
+                <p className="mt-3 text-xs uppercase tracking-[4px] text-black/40">
+                  {stat.label}
+                </p>
+              </div>
+              {i < 2 && <div className="w-16" />}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -269,146 +262,50 @@ export default function About() {
 
   </div>
 
-  {/* Description */}
+  {/* Description — luxury upgrade */}
 
-  <div
-    className="
-    relative
-    z-20
-
-    mt-10
-
-    max-w-[320px]
-  "
-  >
-
-    <p
-      className="
-      text-[15px]
-
-      leading-[1.9]
-
-      text-black/55
-    "
+  <div className="relative z-20 mt-10 max-w-[320px]">
+    <span
+      className="block leading-none text-[#C9A86A]/40 select-none"
+      style={{ fontFamily: 'Georgia, serif', fontSize: '48px' }}
     >
+      "
+    </span>
+    <p className="-mt-5 text-[15px] leading-[1.9] text-black/55">
       AILURA creates handcrafted luxury nail
-      collections inspired by elegance,
-      fashion and modern beauty. Every design
+      collections inspired by{' '}
+      <span className="italic text-[#C9A86A]">elegance, fashion</span>{' '}
+      and modern beauty. Every design
       is curated to elevate confidence and
       celebrate individuality through premium
       craftsmanship.
     </p>
-
   </div>
 
-  {/* Stats */}
+  {/* Stats — luxury upgrade */}
 
-  <div
-    className="
-    relative
-    z-20
-
-    mt-12
-
-    grid
-    grid-cols-3
-
-    gap-4
-
-    border-t
-    border-[#E7DED4]
-
-    pt-6
-  "
-  >
-
-    <div>
-
-      <h3
-        className="
-        text-3xl
-        font-light
-      "
-      >
-        500+
-      </h3>
-
-      <p
-        className="
-        mt-2
-
-        text-[10px]
-
-        uppercase
-
-        tracking-[3px]
-
-        text-black/40
-      "
-      >
-        Clients
-      </p>
-
-    </div>
-
-    <div>
-
-      <h3
-        className="
-        text-3xl
-        font-light
-      "
-      >
-        98%
-      </h3>
-
-      <p
-        className="
-        mt-2
-
-        text-[10px]
-
-        uppercase
-
-        tracking-[3px]
-
-        text-black/40
-      "
-      >
-        Rating
-      </p>
-
-    </div>
-
-    <div>
-
-      <h3
-        className="
-        text-3xl
-        font-light
-      "
-      >
-        01
-      </h3>
-
-      <p
-        className="
-        mt-2
-
-        text-[10px]
-
-        uppercase
-
-        tracking-[3px]
-
-        text-black/40
-      "
-      >
-        Years
-      </p>
-
-    </div>
-
+  <div className="relative z-20 mt-12 grid grid-cols-3 gap-4 border-t border-[#E7DED4] pt-6">
+    {[
+      { value: '500', suffix: '+', label: 'Clients' },
+      { value: '98', suffix: '%', label: 'Rating' },
+      { value: '01', suffix: '', label: 'Years' },
+    ].map((stat) => (
+      <div key={stat.label}>
+        <div className="flex items-center gap-1.5 mb-2">
+          <span className="h-[3px] w-[3px] rounded-full bg-[#C9A86A]" />
+        </div>
+        <h3
+          className="italic font-light leading-none"
+          style={{ fontFamily: 'Georgia, serif', fontSize: '30px' }}
+        >
+          {stat.value}
+          <span className="text-[#C9A86A]">{stat.suffix}</span>
+        </h3>
+        <p className="mt-2 text-[10px] uppercase tracking-[3px] text-black/40">
+          {stat.label}
+        </p>
+      </div>
+    ))}
   </div>
 
 </div>

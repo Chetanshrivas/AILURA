@@ -35,26 +35,38 @@ export default function Footer() {
       <div className="relative z-10 px-6 pt-16 pb-10 md:px-12 lg:px-20">
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
 
-          {/* Brand */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <p className="text-[15px] uppercase tracking-[10px] text-white/85 font-light">
-              AILURA
-            </p>
-            <p className="mt-5 text-[11px] leading-[2] text-white/35 max-w-[240px]">
-              Premium luxury nail artistry inspired by elegance, beauty and cinematic fashion aesthetics.
-            </p>
-            <div className="mt-7 flex items-center gap-2.5">
-              {[
-                { icon: <Instagram size={13} strokeWidth={1.5} />, label: 'Instagram', href: 'https://www.instagram.com/ailura.studio?igsh=NDB6emI0cnE3M3Ez' },
-                { icon: <Facebook size={13} strokeWidth={1.5} />, label: 'Facebook', href: 'https://www.facebook.com/share/1LhJ9mCsFo/' },
-              ].map(({ icon, label, href }) => (
-                <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
-                  className="group flex h-9 w-9 items-center justify-center border border-white/8 transition-all duration-300 hover:border-[#C9A86A]/50">
-                  <span className="text-white/20 transition-colors duration-300 group-hover:text-[#C9A86A]">{icon}</span>
-                </a>
-              ))}
-            </div>
-          </div>
+        
+{/* Brand — luxury wordmark, ek hi word jaisa lagega */}
+<div className="sm:col-span-2 lg:col-span-1">
+  <p className="text-[30px] uppercase tracking-[10px] text-white/90 font-light">
+    <span className="text-[#C9A86A]">A</span>ILURA
+  </p>
+
+  <div className="mt-4 flex items-center gap-2.5">
+    <span className="h-[1px] w-3 bg-gradient-to-r from-[#C9A86A] to-transparent" />
+    <span className="text-[6px] uppercase tracking-[4px] text-[#C9A86A]/70">
+      Est. 2026 · Faridabad
+    </span>
+  </div>
+
+  <p className="mt-6 text-[11px] leading-[2] text-white/35 max-w-[240px]">
+    Premium luxury nail artistry inspired by{' '}
+    <span className="text-white/55 italic">elegance, beauty</span>{' '}
+    and cinematic fashion aesthetics.
+  </p>
+
+  <div className="mt-7 flex items-center gap-2.5">
+    {[
+      { icon: <Instagram size={13} strokeWidth={1.5} />, label: 'Instagram', href: 'https://www.instagram.com/ailura.studio?igsh=NDB6emI0cnE3M3Ez' },
+      { icon: <Facebook size={13} strokeWidth={1.5} />, label: 'Facebook', href: 'https://www.facebook.com/share/1LhJ9mCsFo/' },
+    ].map(({ icon, label, href }) => (
+      <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
+        className="group flex h-9 w-9 items-center justify-center border border-white/8 transition-all duration-300 hover:border-[#C9A86A]/60 hover:scale-105 hover:shadow-[0_0_12px_rgba(201,168,106,0.25)]">
+        <span className="text-white/20 transition-colors duration-300 group-hover:text-[#C9A86A]">{icon}</span>
+      </a>
+    ))}
+  </div>
+</div>
 
           {/* Navigate */}
           <div>
@@ -127,4 +139,4 @@ export default function Footer() {
 
     </footer>
   )
-} 
+}

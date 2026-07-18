@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Sparkles, Clock3, Hand, Truck } from 'lucide-react'
+import { Sparkles, Clock3, Hand, Truck, ArrowUpRight } from 'lucide-react'
 
 const features = [
   {
@@ -59,7 +59,7 @@ export default function WhyWomenChoose() {
               className="font-light leading-none text-[#111]"
               style={{ fontSize: 'clamp(32px, 5vw, 80px)' }}
             >
-              The AILURA Difference.
+              The <span className="italic text-[#C9A86A]">AILURA</span> Difference.
             </h2>
           </motion.div>
 
@@ -88,7 +88,7 @@ export default function WhyWomenChoose() {
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 className="group relative flex items-center gap-0 border-b border-black/8 first:border-t first:border-black/8 cursor-default overflow-hidden"
-                style={{ padding: '24px 0' }}
+                style={{ padding: '28px 0' }}
               >
                 {/* Dark bg sliding left to right on hover */}
                 <motion.div
@@ -99,43 +99,76 @@ export default function WhyWomenChoose() {
                   transition={{ duration: 0.80, ease: [0.25, 0.1, 0.25, 1] }}
                 />
 
+                {/* Subtle gold radial glow behind icon on hover */}
+                <motion.div
+                  className="absolute pointer-events-none"
+                  style={{
+                    left: '150px',
+                    top: '50%',
+                    width: 140,
+                    height: 140,
+                    marginTop: -70,
+                    background: 'radial-gradient(circle, rgba(201,168,106,0.18) 0%, transparent 70%)',
+                    zIndex: 0,
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: isHovered ? 1 : 0 }}
+                  transition={{ duration: 0.6 }}
+                />
+
                 {/* Big number */}
                 <span
-                  className="relative z-10 w-40 flex-shrink-0 font-light transition-all duration-500 select-none"
+                  className="relative z-10 w-40 flex-shrink-0 italic font-light transition-all duration-500 select-none"
                   style={{
-                    fontSize: 'clamp(60px, 6vw, 90px)',
+                    fontSize: 'clamp(56px, 5.5vw, 82px)',
+                    fontFamily: 'Georgia, serif',
                     color: isHovered ? '#C9A86A' : 'rgba(0,0,0,0.06)',
                     lineHeight: 1,
+                    transform: isHovered ? 'translateX(4px)' : 'translateX(0)',
                   }}
                 >
                   {item.number}
                 </span>
 
                 {/* Icon */}
-                <div
-                  className="relative z-10 mr-10 flex h-12 w-12 flex-shrink-0 items-center justify-center border transition-all duration-500"
+                <motion.div
+                  className="relative z-10 mr-10 flex h-12 w-12 flex-shrink-0 items-center justify-center border"
                   style={{
                     borderColor: isHovered ? '#C9A86A' : 'rgba(0,0,0,0.1)',
                     background: isHovered ? 'rgba(201,168,106,0.08)' : 'transparent',
                   }}
+                  animate={{
+                    rotate: isHovered ? 8 : 0,
+                    scale: isHovered ? 1.08 : 1,
+                  }}
+                  transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
                 >
                   <Icon
                     size={18}
                     style={{ color: isHovered ? '#C9A86A' : 'rgba(0,0,0,0.3)' }}
                     className="transition-colors duration-500"
                   />
-                </div>
+                </motion.div>
 
-                {/* Title */}
-                <h3
-                  className="relative z-10 w-72 flex-shrink-0 font-light leading-tight transition-all duration-500"
-                  style={{
-                    fontSize: 'clamp(20px, 2vw, 30px)',
-                    color: isHovered ? '#ffffff' : 'rgba(0,0,0,0.55)',
-                  }}
-                >
-                  {item.title}
-                </h3>
+                {/* Title + gold underline */}
+                <div className="relative z-10 w-72 flex-shrink-0">
+                  <h3
+                    className="font-light leading-tight transition-all duration-500"
+                    style={{
+                      fontSize: 'clamp(20px, 2vw, 30px)',
+                      color: isHovered ? '#ffffff' : 'rgba(0,0,0,0.55)',
+                    }}
+                  >
+                    {item.title}
+                  </h3>
+                  <motion.div
+                    className="mt-2 h-[1px] bg-[#C9A86A]"
+                    style={{ transformOrigin: 'left' }}
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: isHovered ? 1 : 0 }}
+                    transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                  />
+                </div>
 
                 {/* Description */}
                 <p
@@ -144,6 +177,19 @@ export default function WhyWomenChoose() {
                 >
                   {item.description}
                 </p>
+
+                {/* Arrow hint — fades in on hover */}
+                <motion.div
+                  className="relative z-10 ml-6 flex-shrink-0"
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{
+                    opacity: isHovered ? 1 : 0,
+                    x: isHovered ? 0 : -8,
+                  }}
+                  transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  <ArrowUpRight size={20} style={{ color: '#C9A86A' }} />
+                </motion.div>
               </motion.div>
             )
           })}
@@ -179,20 +225,26 @@ export default function WhyWomenChoose() {
                   {/* Number + icon col */}
                   <div className="flex flex-col items-center gap-2 w-12 flex-shrink-0">
                     <span
-                      className="text-[32px] font-light leading-none select-none transition-colors duration-500"
-                      style={{ color: isHovered ? '#C9A86A' : 'rgba(0,0,0,0.06)' }}
+                      className="italic font-light leading-none select-none transition-colors duration-500"
+                      style={{
+                        fontSize: '32px',
+                        fontFamily: 'Georgia, serif',
+                        color: isHovered ? '#C9A86A' : 'rgba(0,0,0,0.06)',
+                      }}
                     >
                       {item.number}
                     </span>
-                    <div
-                      className="flex h-10 w-10 items-center justify-center border transition-all duration-500"
+                    <motion.div
+                      className="flex h-10 w-10 items-center justify-center border"
                       style={{
                         borderColor: isHovered ? '#C9A86A' : 'rgba(201,168,106,0.3)',
                         background: isHovered ? 'rgba(201,168,106,0.08)' : 'transparent',
                       }}
+                      animate={{ rotate: isHovered ? 8 : 0, scale: isHovered ? 1.05 : 1 }}
+                      transition={{ duration: 0.4 }}
                     >
                       <Icon size={16} style={{ color: '#C9A86A' }} />
-                    </div>
+                    </motion.div>
                   </div>
 
                   {/* Text */}
@@ -203,8 +255,15 @@ export default function WhyWomenChoose() {
                     >
                       {item.title}
                     </h3>
+                    <motion.div
+                      className="mt-1.5 mb-2 h-[1px] bg-[#C9A86A]"
+                      style={{ transformOrigin: 'left' }}
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: isHovered ? 1 : 0 }}
+                      transition={{ duration: 0.5 }}
+                    />
                     <p
-                      className="mt-2.5 text-[12px] leading-[1.85] transition-colors duration-500"
+                      className="text-[12px] leading-[1.85] transition-colors duration-500"
                       style={{ color: isHovered ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)' }}
                     >
                       {item.description}

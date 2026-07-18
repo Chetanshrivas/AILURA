@@ -8,6 +8,22 @@ interface Props {
   onView: (appointment: any) => void
 }
 
+// ── Services array ya purana single service, dono handle karo ──
+function getServicesDisplay(appointment: any): string {
+  if (Array.isArray(appointment.services) && appointment.services.length > 0) {
+    if (appointment.services.length === 1) return appointment.services[0]
+    return `${appointment.services[0]} +${appointment.services.length - 1} more`
+  }
+  return appointment.service || '—'
+}
+
+function getServicesSearchable(appointment: any): string {
+  if (Array.isArray(appointment.services) && appointment.services.length > 0) {
+    return appointment.services.join(' ').toLowerCase()
+  }
+  return (appointment.service || '').toLowerCase()
+}
+
 export default function AppointmentsTable({ appointments, search, onView }: Props) {
 
   const query = search.toLowerCase()
@@ -15,14 +31,13 @@ export default function AppointmentsTable({ appointments, search, onView }: Prop
   const filtered = appointments.filter((a) =>
     a.full_name?.toLowerCase().includes(query) ||
     a.email?.toLowerCase().includes(query) ||
-    a.phone?.toLowerCase().includes(query)
+    a.phone?.toLowerCase().includes(query) ||
+    getServicesSearchable(a).includes(query)
   )
 
-  // Sabse recent sabse upar — date + time combine karke sort karo
   const sorted = [...filtered].sort((a, b) => {
     const dateA = new Date(`${a.appointment_date} ${a.appointment_time || ''}`).getTime()
     const dateB = new Date(`${b.appointment_date} ${b.appointment_time || ''}`).getTime()
-    // agar created_at available hai to usse fallback / primary bhi use kar sakte ho
     if (!isNaN(dateA) && !isNaN(dateB)) return dateB - dateA
     return (b.created_at || '').localeCompare(a.created_at || '')
   })
@@ -36,7 +51,6 @@ export default function AppointmentsTable({ appointments, search, onView }: Prop
   return (
     <div className="overflow-hidden rounded-[24px] border border-[#E9E2D9] bg-white">
 
-      {/* Header */}
       <div className="flex items-center justify-between border-b border-[#EEE7DE] px-7 py-5">
         <div>
           <h2 className="text-[16px] font-semibold text-black">Appointments</h2>
@@ -47,12 +61,11 @@ export default function AppointmentsTable({ appointments, search, onView }: Prop
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#F0E9E0] bg-[#FCFAF8]">
-              {['#', 'Customer', 'Service', 'Date', 'Time', 'Status', 'Action'].map(h => (
+              {['#', 'Customer', 'Services', 'Date', 'Time', 'Status', 'Action'].map(h => (
                 <th key={h} className="px-5 py-4 text-left text-[10px] uppercase tracking-[3px] text-black/35 font-medium">
                   {h}
                 </th>
@@ -86,7 +99,7 @@ export default function AppointmentsTable({ appointments, search, onView }: Prop
                   </td>
 
                   <td className="px-5 py-4">
-                    <span className="text-[13px] text-black/60">{appointment.service}</span>
+                    <span className="text-[13px] text-black/60">{getServicesDisplay(appointment)}</span>
                   </td>
 
                   <td className="px-5 py-4 text-[12px] text-black/40">

@@ -12,12 +12,14 @@ interface Props {
   refreshAppointments: () => Promise<void>
 }
 
-export default function AppointmentDetailsModal({
-  open,
-  onClose,
-  appointment,
-  refreshAppointments,
-}: Props) {
+function getServicesList(appointment: any): string[] {
+  if (Array.isArray(appointment?.services) && appointment.services.length > 0) {
+    return appointment.services
+  }
+  return appointment?.service ? [appointment.service] : []
+}
+
+export default function AppointmentDetailsModal({ open, onClose, appointment, refreshAppointments }: Props) {
   const [status, setStatus] = useState(appointment?.status || '')
 
   useEffect(() => {
@@ -27,6 +29,8 @@ export default function AppointmentDetailsModal({
   }, [appointment])
 
   if (!open || !appointment) return null
+
+  const servicesList = getServicesList(appointment)
 
   async function saveChanges() {
     try {
@@ -43,6 +47,7 @@ export default function AppointmentDetailsModal({
               full_name: appointment.full_name,
               email: appointment.email,
               service: appointment.service,
+              services: appointment.services,
               appointment_date: appointment.appointment_date,
               appointment_time: appointment.appointment_time,
               status,
@@ -83,8 +88,27 @@ export default function AppointmentDetailsModal({
           </div>
 
           <div>
+            <p className="mb-2 text-[10px] uppercase tracking-[3px] text-black/35 font-medium">
+              Services {servicesList.length > 0 && `(${servicesList.length})`}
+            </p>
+            {servicesList.length === 0 ? (
+              <p className="text-[13px] text-black/40">—</p>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {servicesList.map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-lg border border-[#E8DED3] bg-[#F8F4EE] px-2.5 py-1 text-[11px] text-[#8a6b35]"
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
             <p className="mb-2 text-[10px] uppercase tracking-[3px] text-black/35 font-medium">Appointment</p>
-            <p className="text-[13px] text-black/70">Service: <span className="text-black">{appointment.service}</span></p>
             <p className="text-[13px] text-black/70">Date: <span className="text-black">{appointment.appointment_date}</span></p>
             <p className="text-[13px] text-black/70">Time: <span className="text-black">{appointment.appointment_time}</span></p>
           </div>
@@ -101,9 +125,9 @@ export default function AppointmentDetailsModal({
               onChange={(e) => setStatus(e.target.value)}
               className="w-full rounded-xl border border-[#E7E1D8] bg-white px-4 py-3 text-[13px] outline-none focus:border-[#C9A86A] transition-colors"
             >
-              <option>Pending</option>
-              <option>Confirmed</option>
-              <option>Cancelled</option>
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Cancelled">Cancelled</option>
             </select>
 
             {status !== appointment.status && (

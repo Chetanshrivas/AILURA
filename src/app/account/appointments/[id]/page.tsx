@@ -9,6 +9,13 @@ import Footer from '../../../../components/layout/Footer'
 import { ArrowLeft, CalendarDays, Clock3, Sparkles, User, Phone, Mail, FileText } from 'lucide-react'
 import { getAppointmentById } from '../../../../service/appointments'
 
+function getServicesList(appointment: any): string[] {
+  if (Array.isArray(appointment?.services) && appointment.services.length > 0) {
+    return appointment.services
+  }
+  return appointment?.service ? [appointment.service] : []
+}
+
 export default function AppointmentDetailPage() {
   const params = useParams()
   const [appointment, setAppointment] = useState<any>(null)
@@ -112,6 +119,8 @@ if (loading) return (
     </div>
   )
 
+  const servicesList = getServicesList(appointment)
+
   return (
     <>
       <Navbar />
@@ -119,35 +128,32 @@ if (loading) return (
       <main className="min-h-screen bg-[#F8F5F0] px-4 pt-28 pb-20 md:px-8 lg:px-20">
         <div className="mx-auto max-w-7xl">
 
-         
-
           {/* Heading */}
-          {/* Heading */}
-<div className="mb-12">
-  <div className="flex items-center justify-between mb-4">
-    <div className="flex items-center gap-3">
-      <div className="h-px w-4 md:w-8 bg-[#C9A86A]" />
-      <p className="text-[7px] md:text-[10px] uppercase tracking-[4px] md:tracking-[5px] text-[#C9A86A]">
-        Appointment Details
-      </p>
-    </div>
-    <Link
-      href="/account/appointments"
-      className="inline-flex items-center gap-1.5 text-[8px] md:text-[9px] uppercase tracking-[3px] text-black/35 hover:text-[#C9A86A] transition-colors"
-    >
-      <ArrowLeft size={11} />
-      <span className="hidden sm:inline">Back to Appointments</span>
-      <span className="sm:hidden">Appointments</span>
-    </Link>
-  </div>
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-px w-4 md:w-8 bg-[#C9A86A]" />
+                <p className="text-[7px] md:text-[10px] uppercase tracking-[4px] md:tracking-[5px] text-[#C9A86A]">
+                  Appointment Details
+                </p>
+              </div>
+              <Link
+                href="/account/appointments"
+                className="inline-flex items-center gap-1.5 text-[8px] md:text-[9px] uppercase tracking-[3px] text-black/35 hover:text-[#C9A86A] transition-colors"
+              >
+                <ArrowLeft size={11} />
+                <span className="hidden sm:inline">Back to Appointments</span>
+                <span className="sm:hidden">Appointments</span>
+              </Link>
+            </div>
 
-  <h1 className="text-[38px] font-light tracking-[-2px] md:text-[72px]">
-    Luxury Session.
-  </h1>
-  <p className="mt-4 max-w-xl text-sm leading-relaxed text-black/45">
-    View your appointment details and booking information.
-  </p>
-</div>
+            <h1 className="text-[38px] font-light tracking-[-2px] md:text-[72px]">
+              Luxury Session.
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-black/45">
+              View your appointment details and booking information.
+            </p>
+          </div>
 
           {/* Grid */}
           <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
@@ -155,13 +161,36 @@ if (loading) return (
             {/* Left */}
             <div className="space-y-5">
 
-              {/* Service */}
+              {/* Services */}
               <div className="border border-black/10 bg-white p-6 md:p-8">
-                <div className="flex items-center gap-3">
-                  <Sparkles size={18} className="text-[#C9A86A]" />
-                  <p className="text-[10px] uppercase tracking-[4px] text-[#C9A86A]">Selected Service</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Sparkles size={18} className="text-[#C9A86A]" />
+                    <p className="text-[10px] uppercase tracking-[4px] text-[#C9A86A]">
+                      Selected Service{servicesList.length > 1 ? 's' : ''}
+                    </p>
+                  </div>
+                  {servicesList.length > 1 && (
+                    <span className="text-[11px] text-black/35">{servicesList.length} services</span>
+                  )}
                 </div>
-                <h2 className="mt-5 text-3xl font-light md:text-4xl">{appointment.service}</h2>
+
+                {servicesList.length === 0 ? (
+                  <h2 className="mt-5 text-2xl font-light text-black/40 md:text-3xl">—</h2>
+                ) : servicesList.length === 1 ? (
+                  <h2 className="mt-5 text-3xl font-light md:text-4xl">{servicesList[0]}</h2>
+                ) : (
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {servicesList.map((service) => (
+                      <span
+                        key={service}
+                        className="border border-[#C9A86A]/30 bg-[#C9A86A]/5 px-4 py-2 text-[13px] text-[#8a6b35]"
+                      >
+                        {service}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Notes */}
