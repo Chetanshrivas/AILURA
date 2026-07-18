@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getPaginatedProducts, getCategories } from '../../service/products'
@@ -12,7 +12,7 @@ import { useCartStore } from '../../store/cartStore'
 
 const PAGE_SIZE = 16
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const addToCart = useCartStore((state) => state.addToCart)
@@ -35,24 +35,20 @@ export default function ProductsPage() {
   const requestIdRef = useRef(0)
   const topRef = useRef<HTMLDivElement>(null)
 
-  // ── Categories ek baar load ──
   useEffect(() => {
     getCategories().then(setCategories)
   }, [])
 
-  // ── URL ke ?category= ko initial filter mein set karo ──
   useEffect(() => {
     const urlCategory = searchParams.get('category')
     if (urlCategory) setCategory(urlCategory)
   }, [searchParams])
 
-  // ── Search debounce: typing rukne ke 400ms baad hi query ──
   useEffect(() => {
     const t = setTimeout(() => setSearch(searchInput), 400)
     return () => clearTimeout(t)
   }, [searchInput])
 
-  // ── Fetcher: sirf CURRENT page ke 12 products laata hai ──
   const fetchProducts = useCallback(
     async (pageNum: number) => {
       const myRequestId = ++requestIdRef.current
@@ -68,9 +64,9 @@ export default function ProductsPage() {
           sort,
         })
 
-        if (myRequestId !== requestIdRef.current) return // stale response, ignore
+        if (myRequestId !== requestIdRef.current) return
 
-        setProducts(data)          
+        setProducts(data)
         setTotalCount(count)
         setTotalPages(tp)
         setPage(pageNum)
@@ -83,19 +79,16 @@ export default function ProductsPage() {
     [category, search, sort]
   )
 
-  // ── Filter (category/search/sort) badalte hi page 1 se fetch ──
   useEffect(() => {
     fetchProducts(1)
   }, [category, search, sort]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Page number click karne pe fetch + top pe scroll ──
   const goToPage = (p: number) => {
     if (p < 1 || p > totalPages || p === page) return
     fetchProducts(p)
     topRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  // ── Page numbers ka array banate hain (max 5 dikhte hain, ... ke saath) ──
   const getPageNumbers = () => {
     const delta = 1
     const range: (number | string)[] = []
@@ -327,7 +320,6 @@ export default function ProductsPage() {
                   ))}
                 </div>
 
-                {/* ── Real Pagination: page numbers, sirf current page ka data load ── */}
                 {totalPages > 1 && (
                   <div className="mt-12 md:mt-16 flex flex-col items-center gap-3">
                     <p className="text-[9px] uppercase tracking-[3px] text-black/35">
@@ -384,5 +376,35 @@ export default function ProductsPage() {
 
       <Footer />
     </>
+  )
+}
+
+function ProductsPageSkeleton() {
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-[#F8F5F0] px-4 pt-24 pb-16 sm:px-6 md:px-8 md:pt-28 lg:px-20 lg:pt-32">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-5 sm:gap-y-12 md:grid-cols-3 md:gap-x-6 md:gap-y-14 xl:grid-cols-4 xl:gap-x-8">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="aspect-[4/5] w-full bg-black/5" />
+              <div className="mt-3 md:mt-4 space-y-2">
+                <div className="h-3 w-3/4 bg-black/8" />
+                <div className="h-2.5 w-1/2 bg-black/5" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+      <Footer />
+    </>
+  )
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<ProductsPageSkeleton />}>
+      <ProductsPageContent />
+    </Suspense>
   )
 }
