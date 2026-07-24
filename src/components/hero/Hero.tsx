@@ -18,43 +18,16 @@ export default function Hero() {
   return (
     <section className="relative flex h-svh min-h-[620px] items-center justify-center overflow-hidden">
 
-{/* Background single Image Layer */}
-
-{/* <img
-  // src="/collections/welcome.jfif"
-   src="/collections/h1.1.png"
-  alt="Luxury Nails"
-  className="absolute inset-0 h-full w-full object-cover opacity-100"
-/> 
-<> */}
- 
-
-{/* Mobile */}
-
-  {/* <img
-    src="/collections/h1.jfif"
-    alt="Luxury Nails"
-    className="absolute inset-0 h-full w-full object-cover opacity-100 block md:hidden"
-  />
-
-  <img
-    src="/collections/h1.1.png"
-    alt="Luxury Nails"
-    className="absolute inset-0 h-full w-full object-cover opacity-100 hidden md:block"
-  />
-</> */}
-
-{/* ── Poster Image — shows instantly while video loads, prevents gray flash ── */}
+      {/* ── Poster Image — shows instantly while video loads, prevents black flash ── */}
       <img
         src="/collections/hero-poster.png"
-        alt="AILURA Luxury Nails"
+        alt="AILURA Luxury Unisex Salon & Studio"
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
           videoLoaded ? 'opacity-0' : 'opacity-100'
         }`}
       />
 
-{/* ── Video ── */}
-
+      {/* ── Video ── */}
       <video
         ref={videoRef}
         autoPlay
@@ -68,14 +41,11 @@ export default function Hero() {
           videoLoaded ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <source src="/videos/hero2.1.mp4" type="video/mp4" />
+        <source src="/videos/MHC.mp4" type="video/mp4" />
       </video>
 
-      {/* ── Overlays ── */}
-      {/* Lighter top overlay so video breathes naturally */}
-      <div className="absolute inset-0 bg-black/35" />
       {/* Bottom vignette to ground the text */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80" />
 
       {/* ── Content ── */}
       <div className="relative z-10 flex w-full flex-col items-center px-6 text-center text-white sm:px-10">
@@ -89,7 +59,7 @@ export default function Hero() {
         >
           <div className="h-[1px] w-6 bg-[#C9A86A] opacity-80 sm:w-8" />
           <p className="text-[8px] uppercase tracking-[5px] text-white/60 sm:text-[9px] sm:tracking-[7px]">
-            Luxury Nail Studio
+            Luxury Unisex Salon & Studio
           </p>
           <div className="h-[1px] w-6 bg-[#C9A86A] opacity-80 sm:w-8" />
         </motion.div>
@@ -130,8 +100,7 @@ export default function Hero() {
             textShadow: '0 1px 0 rgba(201,168,106,0.3), 0 2px 8px rgba(0,0,0,0.4)',
           }}
         >
-          Handcrafted nail artistry inspired by elegance,
-          beauty and cinematic fashion aesthetics.
+          Where refined grooming meets timeless beauty — crafted for every face, every style, every story.
         </motion.p>
 
         {/* CTAs */}
@@ -149,7 +118,7 @@ export default function Hero() {
               boxShadow: '0 2px 0 #bbb, 0 4px 0 #999, 0 6px 8px rgba(0,0,0,0.35)',
             }}
           >
-            Explore Collection
+            See Our Services
           </Link>
 
           <Link
@@ -161,7 +130,7 @@ export default function Hero() {
               textShadow: '0 1px 0 rgba(201,168,106,0.2), 0 2px 6px rgba(0,0,0,0.3)',
             }}
           >
-            Book Appointment
+            Reserve Your Slot
           </Link>
         </motion.div>
 

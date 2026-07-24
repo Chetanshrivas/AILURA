@@ -106,9 +106,9 @@ export default function Footer() {
             <p className="mb-6 text-[8px] uppercase tracking-[5px] text-[#C9A86A]/80">Atelier Hours</p>
             <div className="flex flex-col gap-4">
               {[
-                { day: 'Mon – Fri', time: '10am – 8pm' },
-                { day: 'Saturday', time: '10am – 6pm' },
-                { day: 'Sunday', time: 'By appt.' },
+                { day: 'Mon – Fri', time: '10am – 9pm' },
+                { day: 'Saturday', time: '10am – 9pm' },
+                { day: 'Sunday', time: '10am – 9pm' },
               ].map(({ day, time }) => (
                 <div key={day} className="flex justify-between gap-4">
                   <span className="text-[11px] text-white/35">{day}</span>
