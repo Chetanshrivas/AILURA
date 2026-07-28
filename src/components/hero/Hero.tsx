@@ -111,7 +111,7 @@ export default function Hero() {
           className="mt-8 flex w-full max-w-[280px] flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center sm:gap-4"
         >
           <Link
-            href="#collections"
+            href="#services"
             className="flex w-full items-center justify-center bg-white py-4 text-[10px] uppercase tracking-[4px] text-black transition-all duration-300 hover:bg-[#C9A86A] hover:text-white sm:w-auto sm:px-8 sm:py-3.5"
             style={{
               clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))',
