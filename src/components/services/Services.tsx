@@ -10,15 +10,15 @@ const featuredCategoryIds = ['nails', 'women', 'men', 'hair-essentials']
 const categoryImages: Record<string, string> = {
   nails: '/collections/S1.jfif',             
   women: '/collections/SW.jfif',            
-  men: '/collections/SM.png',               
+  men: '/collections/SM.webp',               
   'hair-essentials': '/collections/S4.jfif',
-  eyelashes: '/collections/wedding.jpg',
-  'wellness-rituals': '/collections/hero.jpg',
-  facial: '/collections/party.jpg',
-  'hands-feet': '/collections/hero.jpg',
-  makeup: '/collections/wedding.jpg',
-  'pre-bridal-package': '/collections/holiday.jpg',
-  'korean-hair-spa': '/collections/party.jpg',
+  // eyelashes: '/collections/wedding.jpg',
+  // 'wellness-rituals': '/collections/hero.jpg',
+  // facial: '/collections/party.jpg',
+  // 'hands-feet': '/collections/hero.jpg',
+  // makeup: '/collections/wedding.jpg',
+  // 'pre-bridal-package': '/collections/holiday.jpg',
+  // 'korean-hair-spa': '/collections/party.jpg',
 }
 
 const categoryIcons: Record<string, any> = {
@@ -103,11 +103,11 @@ export default function Services() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                  <div className="absolute left-5 top-5 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 backdrop-blur-sm">
+                  <div className="absolute left-5 top-5 flex h-11 w-11 items-center justify-center rounded-full border border-[#C9A86A]/40" style={{ background: 'rgba(14,11,7,0.25)', backdropFilter: 'blur(8px)' }}>
                     <Icon size={17} className="text-white" strokeWidth={1.5} />
                   </div>
 
-                  <div className="absolute right-5 top-5 rounded-full bg-white/15 px-3 py-1.5 text-[10px] uppercase tracking-[2px] text-white backdrop-blur-sm">
+                  <div className="absolute right-5 top-5 rounded-full px-3 py-1.5 text-[10px] uppercase tracking-[2px] text-white" style={{ background: 'rgba(14,11,7,0.25)', backdropFilter: 'blur(8px)' }}>
                     {count} services
                   </div>
                 </div>
@@ -157,11 +157,11 @@ export default function Services() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                    <div className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 backdrop-blur-sm">
+                    <div className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-[#C9A86A]/40" style={{ background: 'rgba(14,11,7,0.25)', backdropFilter: 'blur(8px)' }}>
                       <Icon size={15} className="text-white" strokeWidth={1.5} />
                     </div>
 
-                    <div className="absolute right-4 top-4 rounded-full bg-white/15 px-2.5 py-1 text-[9px] uppercase tracking-[1.5px] text-white backdrop-blur-sm">
+                    <div className="absolute right-4 top-4 rounded-full px-2.5 py-1 text-[9px] uppercase tracking-[1.5px] text-white" style={{ background: 'rgba(14,11,7,0.25)', backdropFilter: 'blur(8px)' }}>
                       {count} services
                     </div>
                   </div>

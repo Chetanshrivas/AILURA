@@ -1,18 +1,22 @@
-export const categories = [
+export const categoryGrid = [
   {
+    type: 'category',
     title: 'PARTY',
-    image: '/collections/party.jpg',
+    image: '/collections/c1.jfif',
   },
   {
+    type: 'service',
+    title: 'KOREAN HAIR SPA',
+    image: '/collections/ms2.jfif',
+  },
+  {
+    type: 'service',
+    title: 'HAIR EXTENSIONS',
+    image: '/collections/ms1.webp',
+  },
+  {
+    type: 'category',
     title: 'WEDDING',
-    image: '/collections/wedding.jpg',
-  },
-  {
-    title: 'HOLIDAY',
-    image: '/collections/holiday.jpg',
-  },
-  {
-    title: 'WORK',
-    image: '/collections/work.jpg',
+    image: '/collections/c4.1.jfif',
   },
 ]

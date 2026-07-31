@@ -118,7 +118,7 @@ export default function About() {
           />
 
           <img
-            src="/collections/about1.png"
+            src="/collections/about1.webp"
             alt="About"
             className="
             relative
@@ -252,7 +252,7 @@ export default function About() {
   "
   >
     <img
-      src="/collections/about1.png"
+      src="/collections/about1.webp"
       alt="About"
       className="
       w-[180px]

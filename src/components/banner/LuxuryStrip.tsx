@@ -3,12 +3,12 @@
 export default function LuxuryStrip() {
 
   const items = [
-    'Luxury Finish',
-    'Long Lasting',
-    'Ethical Beauty',
-    'Couture Nails',
-    'Handcrafted',
-    'Atelier Made',
+    'Nails',
+    'Lashes',
+    'Hair Extensions',
+    'Korean Hair Spa',
+    'Hair Patch',
+    'Makeup',
   ]
 
   return (

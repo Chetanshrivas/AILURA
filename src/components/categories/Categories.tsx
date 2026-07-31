@@ -3,12 +3,20 @@
 import { useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, useInView } from 'framer-motion'
-import { categories } from '../../data/categories'
+import { categoryGrid } from '../../data/categories'
 
 export default function Categories() {
   const router = useRouter()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, amount: 0 })
+
+  const handleClick = (item: { type: string; title: string }) => {
+    if (item.type === 'service') {
+      router.push('/#contact')
+    } else {
+      router.push(`/products?category=${item.title}`)
+    }
+  }
 
   return (
     <section
@@ -19,7 +27,7 @@ export default function Categories() {
       <div className="mb-7 flex items-center gap-4 sm:mb-8">
         <div className="h-[1px] w-8 bg-[#C9A86A] sm:w-10" />
         <p className="text-[9px] uppercase tracking-[5px] text-[#C9A86A] sm:text-[10px]">
-          Premium Collections
+          Premium Collections &amp; Services
         </p>
         <div className="h-[1px] w-8 bg-[#C9A86A] sm:w-10" />
       </div>
@@ -33,74 +41,96 @@ export default function Categories() {
         </h2>
         <div className="flex items-center lg:justify-end">
           <p className="max-w-[320px] text-[11px] leading-[1.8] text-black/45 sm:text-xs lg:text-sm">
-            Four signature collections designed for every moment — from luxury parties and elegant weddings to modern work days and holiday escapes.
+            Explore our signature collections, and discover the salon services
+            crafted to bring every look to life.
           </p>
         </div>
       </div>
 
-      <div
-        ref={ref}
-        className="grid grid-cols-1 gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-2 lg:gap-8"
-      >
-        {categories.map((item, index) => (
-          <motion.div
-            key={item.title}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-            initial={{ opacity: 0, y: 40 }}
-            transition={{ duration: 0.65, delay: index * 0.08 }}
-            onClick={() => router.push(`/products?category=${item.title}`)}
-            className="group relative cursor-pointer"
-          >
-            {/* Offset gold frame — sits behind the card, echoes the About section's bordered-image motif */}
-            <div className="pointer-events-none absolute -bottom-3 -right-3 h-full w-full rounded-2xl border border-[#C9A86A]/40 transition-all duration-500 group-hover:-bottom-2 group-hover:-right-2" />
+      <div className="mx-auto max-w-[1100px]">
+        <div
+          ref={ref}
+          className="grid grid-cols-2 gap-3 sm:gap-5 lg:gap-6"
+        >
+          {categoryGrid.map((item, index) => {
+            const isService = item.type === 'service'
+            // subtle alternating tilt — categories tilt left, services tilt right
+            const tilt = isService ? 0.8 : -0.8
 
-            <div className="relative overflow-hidden rounded-2xl">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-full object-cover transition duration-[1200ms] ease-out group-hover:scale-[1.06]"
-                style={{ height: 'clamp(260px, 45vw, 560px)' }}
-              />
+            return (
+              <motion.div
+                key={item.title}
+                animate={
+                  isInView
+                    ? { opacity: 1, y: 0, rotate: tilt }
+                    : { opacity: 0, y: 40, rotate: 0 }
+                }
+                initial={{ opacity: 0, y: 40, rotate: 0 }}
+                transition={{
+                  duration: 0.65,
+                  delay: index * 0.08,
+                  ease: [0.25, 0.1, 0.25, 1],
+                }}
+                whileHover={{ rotate: 0, scale: 1.015 }}
+                onClick={() => handleClick(item)}
+                className="group relative cursor-pointer"
+              >
+                {/* Offset gold frame */}
+                <div className="pointer-events-none absolute -bottom-2 -right-2 h-full w-full rounded-xl border border-[#C9A86A]/40 transition-all duration-500 group-hover:-bottom-1.5 group-hover:-right-1.5 sm:-bottom-3 sm:-right-3 sm:rounded-2xl" />
 
-              {/* Base gradient for text legibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
+                <div className="relative overflow-hidden rounded-xl shadow-md transition-shadow duration-500 group-hover:shadow-xl sm:rounded-2xl">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full object-cover transition duration-[1200ms] ease-out group-hover:scale-[1.06] h-[160px] sm:h-[220px] md:h-[260px] lg:h-[300px] xl:h-[340px]"
+                  />
 
-              {/* Gold wash on hover */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#C9A86A]/25 via-transparent to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
 
-              {/* Inner gold border that reveals on hover */}
-              <div className="pointer-events-none absolute inset-3 rounded-xl border border-[#C9A86A]/0 transition-all duration-500 group-hover:inset-4 group-hover:border-[#C9A86A]/70 sm:inset-4 sm:group-hover:inset-5" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#C9A86A]/25 via-transparent to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100" />
 
-              {/* Index number */}
-              <div className="absolute left-4 top-4 flex items-center gap-2 sm:left-5 sm:top-5">
-                <span className="h-[3px] w-[3px] rounded-full bg-[#C9A86A]" />
-                <span className="text-[10px] tracking-[4px] text-white/60 sm:text-xs">
-                  0{index + 1}
-                </span>
-              </div>
+                  <div className="pointer-events-none absolute inset-2 rounded-lg border border-[#C9A86A]/0 transition-all duration-500 group-hover:inset-2.5 group-hover:border-[#C9A86A]/70 sm:inset-3 sm:rounded-xl sm:group-hover:inset-4" />
 
-              {/* Corner mark, top-right — appears on hover for a finished, tailored feel */}
-              <div className="absolute right-4 top-4 h-6 w-6 rounded-tr-lg border-r border-t border-[#C9A86A]/0 opacity-0 transition-all duration-500 group-hover:border-[#C9A86A]/80 group-hover:opacity-100 sm:right-5 sm:top-5" />
+                  <div className="absolute left-2.5 top-2.5 flex items-center gap-1.5 sm:left-4 sm:top-4">
+                    <span
+                      className={`h-[3px] w-[3px] rounded-full ${
+                        isService ? 'bg-[#E8D9BC]' : 'bg-[#C9A86A]'
+                      }`}
+                    />
+                    <span
+                      className={`text-[8px] tracking-[3px] sm:text-[10px] sm:tracking-[4px] ${
+                        isService ? 'text-[#E8D9BC]/80' : 'text-white/60'
+                      }`}
+                    >
+                      {isService ? 'SERVICE' : 'COLLECTION'} · 0{index + 1}
+                    </span>
+                  </div>
 
-              <div className="absolute bottom-0 left-0 w-full p-5 sm:p-6 md:p-8">
-                <div className="mb-3 h-[1px] w-10 origin-left scale-x-0 bg-[#C9A86A] transition-transform duration-700 group-hover:scale-x-100" />
-                <h3
-                  className="mb-1.5 font-light text-white"
-                  style={{ fontSize: 'clamp(22px, 4vw, 48px)' }}
-                >
-                  {item.title}
-                </h3>
-                <p className="mb-4 text-[11px] leading-relaxed text-white/60 sm:text-sm sm:text-white/70">
-                  Luxury handcrafted nail collection.
-                </p>
-                <span className="inline-flex items-center gap-2 text-[9px] uppercase tracking-[4px] text-[#D4B06A] sm:text-[10px]">
-                  Discover
-                  <span className="transition-transform duration-300 group-hover:translate-x-1.5">→</span>
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+                  <div className="absolute right-2.5 top-2.5 h-5 w-5 rounded-tr-lg border-r border-t border-[#C9A86A]/0 opacity-0 transition-all duration-500 group-hover:border-[#C9A86A]/80 group-hover:opacity-100 sm:right-4 sm:top-4 sm:h-6 sm:w-6" />
+
+                  <div className="absolute bottom-0 left-0 w-full p-3 sm:p-5 md:p-6">
+                    <div className="mb-2 h-[1px] w-8 origin-left scale-x-0 bg-[#C9A86A] transition-transform duration-700 group-hover:scale-x-100 sm:mb-3 sm:w-10" />
+                    <h3
+                      className="mb-1 font-light text-white sm:mb-1.5"
+                      style={{ fontSize: 'clamp(16px, 3.5vw, 32px)' }}
+                    >
+                      {item.title}
+                    </h3>
+                    <p className="mb-2 hidden text-[9px] leading-relaxed text-white/60 sm:mb-4 sm:block sm:text-sm sm:text-white/70">
+                      {isService
+                        ? 'Book a session with our expert stylists.'
+                        : 'Luxury handcrafted nail collection.'}
+                    </p>
+                    <span className="inline-flex items-center gap-1.5 text-[8px] uppercase tracking-[3px] text-[#D4B06A] sm:gap-2 sm:text-[10px] sm:tracking-[4px]">
+                      {isService ? 'Book Now' : 'Discover'}
+                      <span className="transition-transform duration-300 group-hover:translate-x-1.5">→</span>
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
       </div>
 
     </section>
