@@ -19,7 +19,7 @@ export default function Hero() {
     <section className="relative flex h-svh min-h-[620px] items-center justify-center overflow-hidden">
 
       <Image
-        src="/collections/hero-poster.png"
+        src="/collections/hero-poster.webp"
         alt="AILURA Luxury Unisex Salon & Studio"
         fill
         priority
@@ -37,14 +37,14 @@ export default function Hero() {
         loop
         playsInline
         preload="metadata"
-        poster="/collections/hero-poster.png"
+        poster="/collections/hero-poster.webp"
         onCanPlay={() => setVideoLoaded(true)}
         onLoadedData={() => setVideoLoaded(true)}
         className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
           videoLoaded ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <source src="/videos/MHC1.M.mp4" media="(max-width: 768px)" type="video/mp4" />
+        <source src="/videos/MHC1-mobile.mp4" media="(max-width: 768px)" type="video/mp4" />
         <source src="/videos/MHC1.mp4" type="video/mp4" />
       </video>
 
