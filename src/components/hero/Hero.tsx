@@ -58,7 +58,7 @@ transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
 className="mb-6 flex items-center gap-3 sm:mb-8 sm:gap-4"
 >
 <div className="h-[1px] w-6 bg-[#C9A86A] opacity-80 sm:w-8" />
-<p className="text-[8px] uppercase tracking-[5px] text-white/60 sm:text-[7px] sm:tracking-[7px]">
+<p className="text-[7px] uppercase tracking-[5px] text-white/60 sm:text-[7px] sm:tracking-[7px]">
 Luxury Unisex Salon & Studio
 </p>
 <div className="h-[1px] w-6 bg-[#C9A86A] opacity-80 sm:w-8" />
