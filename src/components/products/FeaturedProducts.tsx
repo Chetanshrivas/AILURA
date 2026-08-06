@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useCartStore } from '../../store/cartStore'
 import { ShoppingBag, ArrowRight, Eye } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 interface Product {
   id?: number
@@ -22,11 +24,146 @@ interface Props {
   products: Product[]
 }
 
+interface FlyingItem {
+  id: number
+  src: string
+  startX: number
+  startY: number
+  startW: number
+  startH: number
+  endX: number
+  endY: number
+}
 
+function getCartIconCenter(): { x: number; y: number } | null {
+  const icons = document.querySelectorAll<HTMLElement>('[data-cart-icon="true"]')
+  for (const icon of icons) {
+    const rect = icon.getBoundingClientRect()
+    if (rect.width > 0 && rect.height > 0) {
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+    }
+  }
+  return null
+}
+
+// ── Product image with hover (desktop) / touch (mobile) carousel ──
+// Koi IntersectionObserver nahi — sirf explicit interaction pe chalega
+function  ProductImage({ product }: { product: Product }) {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const images = product.image_urls?.length ? product.image_urls : ['/placeholder.jpg']
+
+  const startCarousel = () => {
+    if (images.length <= 1) return
+    timeoutRef.current = setTimeout(() => {
+      intervalRef.current = setInterval(() => {
+        setActiveIndex((prev) => (prev + 1) % images.length)
+      }, 900)
+    }, 10)
+  }
+
+  const stopCarousel = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    timeoutRef.current = null
+    intervalRef.current = null
+    setActiveIndex(0)
+  }
+
+  useEffect(() => {
+    return () => stopCarousel()
+  }, [])
+
+  return (
+    <Link href={`/product/${product.slug}`}>
+      <div
+        onMouseEnter={startCarousel}
+        onMouseLeave={stopCarousel}
+        onTouchStart={startCarousel}
+        onTouchEnd={stopCarousel}
+        onTouchCancel={stopCarousel}
+        className="relative aspect-[4/5] w-full overflow-hidden"
+      >
+        {images.map((src, i) => (
+          <img
+            key={src + i}
+            src={src}
+            alt={product.title}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+              i === activeIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        ))}
+
+        {/* {images.length > 1 && (
+          <div className="absolute top-2 left-1/2 z-10 flex -translate-x-1/2 gap-1 md:top-3">
+            {images.map((_, i) => (
+              <span
+                key={i}
+                className={`h-1 w-1 rounded-full transition-all duration-300 ${
+                  i === activeIndex ? 'w-3 bg-white' : 'bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        )} */}
+      </div>
+    </Link>
+  )
+}
 
 export default function FeaturedProducts({ products }: Props) {
   const featuredProducts = products.filter((p) => p.featured).slice(0, 8)
   const addToCart = useCartStore((state) => state.addToCart)
+
+  const [flyingItems, setFlyingItems] = useState<FlyingItem[]>([])
+  const [mounted, setMounted] = useState(false)
+  const flyIdRef = useRef(0)
+
+  useEffect(() => setMounted(true), [])
+
+  const handleAddToCart = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    product: Product
+  ) => {
+    e.preventDefault()
+
+    addToCart({
+      ...product,
+      id: product.id!,
+      quantity: 1,
+    })
+
+    const card = e.currentTarget.closest('.group')
+    const imgEl = card?.querySelector('img')
+    const cartCenter = getCartIconCenter()
+
+    if (imgEl && cartCenter) {
+      const rect = imgEl.getBoundingClientRect()
+      const id = ++flyIdRef.current
+
+      setFlyingItems((prev) => [
+        ...prev,
+        {
+          id,
+          src: imgEl.src,
+          startX: rect.left,
+          startY: rect.top,
+          startW: rect.width,
+          startH: rect.height,
+          endX: cartCenter.x,
+          endY: cartCenter.y,
+        },
+      ])
+
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('cart-bump'))
+        setFlyingItems((prev) => prev.filter((f) => f.id !== id))
+      }, 750)
+    }
+  }
 
   return (
     <section
@@ -38,7 +175,6 @@ export default function FeaturedProducts({ products }: Props) {
         xl:px-20
       "
     >
-      {/* ── Heading ── */}
       <div className="mb-20">
         <div className="flex items-center gap-4">
           <div className="h-[1px] w-12 bg-[#C9A86A]" />
@@ -63,7 +199,6 @@ export default function FeaturedProducts({ products }: Props) {
             Collections
           </h2>
 
-          {/* Desktop View All */}
           <Link
             href="/products"
             className="
@@ -78,7 +213,6 @@ export default function FeaturedProducts({ products }: Props) {
         </div>
       </div>
 
-      {/* ── Products Grid ── */}
       <div
         className="
           grid grid-cols-2 gap-4
@@ -89,22 +223,12 @@ export default function FeaturedProducts({ products }: Props) {
         {featuredProducts.map((product) => (
           <div key={product.slug} className="group">
 
-            {/* Image Container */}
             <div className="relative overflow-hidden bg-white">
-              <Link href={`/product/${product.slug}`}>
-                <img
-                  src={product.image_urls?.[0] || '/placeholder.jpg'}
-                  alt={product.title}
-                  className="
-                    aspect-[4/5] w-full object-cover
-                    transition-all duration-700 group-hover:scale-110
-                  "
-                />
-              </Link>
+              <ProductImage product={product} />
 
-              {/* Hover overlay — desktop only */}
               <div
                 className="
+                  pointer-events-none
                   absolute inset-0 bg-black/0
                   transition-all duration-500
                   hidden md:block
@@ -112,7 +236,6 @@ export default function FeaturedProducts({ products }: Props) {
                 "
               />
 
-              {/* ── Discount Badge ── */}
               {product.discount_percent > 0 && (
                 <div
                   className="
@@ -123,7 +246,6 @@ export default function FeaturedProducts({ products }: Props) {
                     md:left-4 md:top-4 md:px-3 md:py-2 md:text-[10px]
                   "
                 >
-                  {/* Smart label: show % only on md+, icon on mobile */}
                   <span className="md:hidden">
                     -{product.discount_percent}%
                   </span>
@@ -133,14 +255,6 @@ export default function FeaturedProducts({ products }: Props) {
                 </div>
               )}
 
-              {/* ── Cart Button ── */}
-              {/* Mobile: always visible, small & positioned top-right */}
-              {/* Desktop: hover-reveal, larger */}
-              
-
-              {/* ── View Product Bar ── */}
-              {/* Mobile: always visible at bottom, compact */}
-              {/* Desktop: slide-up on hover */}
               <div className="
 absolute bottom-0 left-0 right-0
 flex items-center
@@ -151,14 +265,7 @@ transition-all duration-300
 ">
 
   <button
-    onClick={(e) => {
-      e.preventDefault()
-      addToCart({
-        ...product,
-        id: product.id!,
-        quantity: 1,
-      })
-    }}
+    onClick={(e) => handleAddToCart(e, product)}
     className="flex flex-1 items-center justify-center gap-1.5 bg-black py-2.5 md:py-3.5 text-[8px] md:text-[9px] uppercase tracking-[2px] md:tracking-[3px] text-white hover:bg-[#C9A86A] transition-colors duration-200"
   >
     <ShoppingBag size={11} className="md:hidden" />
@@ -207,7 +314,6 @@ transition-all duration-300
         ))}
       </div>
 
-      {/* ── Mobile View All ── */}
       <div className="mt-12 text-center md:hidden">
         <Link
           href="/products"
@@ -216,6 +322,31 @@ transition-all duration-300
           View All <ArrowRight size={14} />
         </Link>
       </div>
+
+      {mounted &&
+        createPortal(
+          <div className="pointer-events-none fixed inset-0 z-[9999]">
+            {flyingItems.map((item) => (
+              <img
+                key={item.id}
+                src={item.src}
+                alt=""
+                className="fly-to-cart absolute rounded-lg object-cover shadow-xl"
+                style={
+                  {
+                    left: item.startX,
+                    top: item.startY,
+                    width: item.startW,
+                    height: item.startH,
+                    '--end-x': `${item.endX - item.startX - item.startW / 2}px`,
+                    '--end-y': `${item.endY - item.startY - item.startH / 2}px`,
+                  } as React.CSSProperties
+                }
+              />
+            ))}
+          </div>,
+          document.body
+        )}
     </section>
   )
 }

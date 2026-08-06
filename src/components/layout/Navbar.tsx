@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 
 import {
   useEffect,
@@ -31,6 +32,8 @@ export default function Navbar() {
 
   const [scrolled, setScrolled] =
     useState(false)
+
+  const [bump, setBump] = useState(false)
 
   const items = useCartStore(
     (state) => state.items
@@ -74,6 +77,17 @@ const handleLogout = async () => {
         handleScroll
       )
 
+  }, [])
+
+  // ── Cart bump listener: FeaturedProducts se custom event aata hai
+  // jab flying animation cart tak pahunchti hai, tab icon halka "bump" karega ──
+  useEffect(() => {
+    const handleBump = () => {
+      setBump(true)
+      setTimeout(() => setBump(false), 400)
+    }
+    window.addEventListener('cart-bump', handleBump)
+    return () => window.removeEventListener('cart-bump', handleBump)
   }, [])
 
   const navLinks = [
@@ -147,15 +161,16 @@ const handleLogout = async () => {
 "
         >
 
-          <Link href="/">
-
-            <img
-              src="/logo/logo.png"
-              alt="AILURA"
-              className="h-14 w-auto"
-            />
-
-          </Link>
+<Link href="/" aria-label="AILURA home" className="relative block h-10 w-[100px] lg:h-12 lg:w-[120px]">
+  <Image
+    src="/logo/logo.png"
+    alt="AILURA"
+    fill
+    priority
+    sizes="120px"
+    className="object-contain object-left"
+  />
+</Link>
 
           <div
             className="
@@ -220,7 +235,10 @@ const handleLogout = async () => {
 
             <Link
               href="/cart"
-              className="
+              id="nav-cart-icon-desktop"
+              data-cart-icon="true"
+              aria-label={`View cart${totalItems > 0 ? `, ${totalItems} items` : ''}`}
+              className={`
               relative
               flex
               h-12
@@ -233,7 +251,9 @@ const handleLogout = async () => {
               bg-white
               transition
               hover:scale-105
-            "
+              ${bump ? 'scale-110' : 'scale-100'}
+            `}
+              style={{ transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
             >
 
               <ShoppingBag
@@ -283,6 +303,7 @@ const handleLogout = async () => {
 
     <Link
   href="/account"
+  aria-label="My account"
   className="flex h-12 w-12 items-center justify-center rounded-full border border-[#B89A63] transition-all duration-300 hover:bg-[#B89A63] hover:text-white"
 >
   <User size={18} />
@@ -290,6 +311,7 @@ const handleLogout = async () => {
 
     <button
   onClick={handleLogout}
+  aria-label="Log out"
   className="flex h-12 w-12 items-center justify-center rounded-full bg-black text-white transition-all duration-300 hover:bg-[#B89A63]"
 >
   <LogOut size={18} />
@@ -305,7 +327,14 @@ const handleLogout = async () => {
 
   <Link
     href="/cart"
-    className="relative flex h-12 w-12 items-center justify-center rounded-full bg-tranparent"
+    id="nav-cart-icon-mobile"
+    data-cart-icon="true"
+    aria-label={`View cart${totalItems > 0 ? `, ${totalItems} items` : ''}`}
+    className="relative flex h-12 w-12 items-center justify-center rounded-full bg-transparent"
+    style={{
+      transform: bump ? 'scale(1.15)' : 'scale(1)',
+      transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+    }}
   >
     <ShoppingBag size={17} />
 
@@ -318,7 +347,8 @@ const handleLogout = async () => {
 
   <button
     onClick={() => setOpen(true)}
-    className="flex h-12 w-12 items-center justify-center  bg-tranparent"
+    aria-label="Open menu"
+    className="flex h-12 w-12 items-center justify-center bg-transparent"
   >
     <Menu size={21} />
   </button>

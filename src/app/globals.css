@@ -143,3 +143,11 @@ letter-spacing:8px;
   }
 }
 
+@keyframes flyToCart {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translate(var(--end-x), var(--end-y)) scale(0.15) rotate(12deg); opacity: 0.3; }
+}
+.fly-to-cart {
+  animation: flyToCart 0.7s cubic-bezier(0.55, 0, 0.85, 0.35) forwards;
+}

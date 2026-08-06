@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { createPortal } from 'react-dom'
 import { getPaginatedProducts, getCategories } from '../../service/products'
 import { Product } from '../../types/product'
 import Navbar from '../../components/layout/Navbar'
@@ -11,6 +12,96 @@ import { Search, ShoppingBag, Eye, ChevronLeft, ChevronRight } from 'lucide-reac
 import { useCartStore } from '../../store/cartStore'
 
 const PAGE_SIZE = 16
+
+interface FlyingItem {
+  id: number
+  src: string
+  startX: number
+  startY: number
+  startW: number
+  startH: number
+  endX: number
+  endY: number
+}
+
+function getCartIconCenter(): { x: number; y: number } | null {
+  const icons = document.querySelectorAll<HTMLElement>('[data-cart-icon="true"]')
+  for (const icon of icons) {
+    const rect = icon.getBoundingClientRect()
+    if (rect.width > 0 && rect.height > 0) {
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+    }
+  }
+  return null
+}
+
+// ── Product image with hover (desktop) / touch (mobile) carousel ──
+function ProductImage({ product }: { product: Product }) {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const images = product.image_urls?.length ? product.image_urls : ['/placeholder.jpg']
+
+  const startCarousel = () => {
+    if (images.length <= 1) return
+    timeoutRef.current = setTimeout(() => {
+      intervalRef.current = setInterval(() => {
+        setActiveIndex((prev) => (prev + 1) % images.length)
+      }, 900)
+    }, 100)
+  }
+
+  const stopCarousel = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    timeoutRef.current = null
+    intervalRef.current = null
+    setActiveIndex(0)
+  }
+
+  useEffect(() => {
+    return () => stopCarousel()
+  }, [])
+
+  return (
+    <Link href={`/product/${product.slug}`}>
+      <div
+        onMouseEnter={startCarousel}
+        onMouseLeave={stopCarousel}
+        onTouchStart={startCarousel}
+        onTouchEnd={stopCarousel}
+        onTouchCancel={stopCarousel}
+        className="relative aspect-[4/5] w-full overflow-hidden"
+      >
+        {images.map((src, i) => (
+          <img
+            key={src + i}
+            src={src}
+            alt={product.title}
+            loading="lazy"
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+              i === activeIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        ))}
+
+        {/* {images.length > 1 && (
+          <div className="absolute top-2 left-1/2 z-10 flex -translate-x-1/2 gap-1 md:top-3">
+            {images.map((_, i) => (
+              <span
+                key={i}
+                className={`h-1 w-1 rounded-full transition-all duration-300 ${
+                  i === activeIndex ? 'w-3 bg-white' : 'bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        )} */}
+      </div>
+    </Link>
+  )
+}
 
 function ProductsPageContent() {
   const searchParams = useSearchParams()
@@ -34,6 +125,13 @@ function ProductsPageContent() {
 
   const requestIdRef = useRef(0)
   const topRef = useRef<HTMLDivElement>(null)
+
+  // ── Flying-to-cart state ──
+  const [flyingItems, setFlyingItems] = useState<FlyingItem[]>([])
+  const [mounted, setMounted] = useState(false)
+  const flyIdRef = useRef(0)
+
+  useEffect(() => setMounted(true), [])
 
   useEffect(() => {
     getCategories().then(setCategories)
@@ -102,6 +200,43 @@ function ProductsPageContent() {
     if (totalPages > 1) range.push(totalPages)
 
     return range
+  }
+
+  const handleAddToCart = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    product: Product
+  ) => {
+    e.preventDefault()
+
+    addToCart({ ...product, id: product.id!, quantity: 1 })
+
+    const card = e.currentTarget.closest('.group')
+    const imgEl = card?.querySelector('img')
+    const cartCenter = getCartIconCenter()
+
+    if (imgEl && cartCenter) {
+      const rect = imgEl.getBoundingClientRect()
+      const id = ++flyIdRef.current
+
+      setFlyingItems((prev) => [
+        ...prev,
+        {
+          id,
+          src: imgEl.src,
+          startX: rect.left,
+          startY: rect.top,
+          startW: rect.width,
+          startH: rect.height,
+          endX: cartCenter.x,
+          endY: cartCenter.y,
+        },
+      ])
+
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('cart-bump'))
+        setFlyingItems((prev) => prev.filter((f) => f.id !== id))
+      }, 750)
+    }
   }
 
   return (
@@ -239,14 +374,7 @@ function ProductsPageContent() {
                   {products.map((product) => (
                     <div key={product.slug} className="group">
                       <div className="relative overflow-hidden bg-white">
-                        <Link href={`/product/${product.slug}`}>
-                          <img
-                            src={product.image_urls?.[0] || '/placeholder.jpg'}
-                            alt={product.title}
-                            loading="lazy"
-                            className="aspect-[4/5] w-full object-cover transition-all duration-700 group-hover:scale-105"
-                          />
-                        </Link>
+                        <ProductImage product={product} />
 
                         {product.category && (
                           <div className="absolute left-2 top-2 md:left-3 md:top-3 bg-white/90 backdrop-blur-sm px-2 py-0.5 md:px-3 md:py-1 text-[8px] md:text-[9px] uppercase tracking-[2px] text-black/70">
@@ -269,10 +397,7 @@ function ProductsPageContent() {
                           transition-all duration-300
                         ">
                           <button
-                            onClick={(e) => {
-                              e.preventDefault()
-                              addToCart({ ...product, id: product.id!, quantity: 1 })
-                            }}
+                            onClick={(e) => handleAddToCart(e, product)}
                             aria-label="Add to cart"
                             className="flex flex-1 items-center justify-center gap-1.5 bg-black/85 py-2.5 md:py-3.5 text-[8px] md:text-[9px] uppercase tracking-[2px] md:tracking-[3px] text-white hover:bg-[#C9A86A] transition-colors duration-200 active:scale-95"
                           >
@@ -375,6 +500,31 @@ function ProductsPageContent() {
       </main>
 
       <Footer />
+
+      {mounted &&
+        createPortal(
+          <div className="pointer-events-none fixed inset-0 z-[9999]">
+            {flyingItems.map((item) => (
+              <img
+                key={item.id}
+                src={item.src}
+                alt=""
+                className="fly-to-cart absolute rounded-lg object-cover shadow-xl"
+                style={
+                  {
+                    left: item.startX,
+                    top: item.startY,
+                    width: item.startW,
+                    height: item.startH,
+                    '--end-x': `${item.endX - item.startX - item.startW / 2}px`,
+                    '--end-y': `${item.endY - item.startY - item.startH / 2}px`,
+                  } as React.CSSProperties
+                }
+              />
+            ))}
+          </div>,
+          document.body
+        )}
     </>
   )
 }
